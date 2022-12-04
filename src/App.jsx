@@ -1,38 +1,60 @@
 import { useState } from 'react'
-import { ArrowCircleRightIcon } from '@heroicons/react/solid'
+import JSConfetti from 'js-confetti'
+
+import { CustomForm } from './components/CustomForm'
+import { OneThing } from './components/OneThing'
+
+const jsConfetti = new JSConfetti()
+
+const getSuccessMessage = () => {
+  const messages = [
+    'Congrats!',
+    'Great Job!',
+    'Don&#39;t ya feel great?!',
+    'Up,up and up!',
+    'Um...Okay',
+    'Did you though?',
+    'Don&#39;t feel like you tried your best...',
+    'Forget about it!',
+  ]
+
+  return messages[Math.floor(Math.random() * messages.length)]
+}
+
 const App = () => {
   const [thing, setThing] = useState('')
+  const [isCompleted, setIsCompleted] = useState(true)
 
   const handleSubmit = (e) => {
     e.preventDefault()
+    setIsCompleted(false)
   }
   const handleChange = (e) => {
     setThing(e.target.value)
   }
 
+  const handleCompletedThing = async (e) => {
+    e.target.setAttribute('disabled', true)
+    setThing(getSuccessMessage())
+    await jsConfetti.addConfetti()
+    e.target.removeAttribute('disabled')
+    setThing('')
+    setIsCompleted(true)
+  }
+
   return (
     <main className="grid place-items-center min-h-screen bg-gradient-to-b from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-900 text-slate-900 dark:text-slate-200">
       <div className="grid place-items-center gap-8 m-8">
-        <h1 className="text-3xl sm:text-6xl font-bold text-center">
-          What is your &quot;One Thing&quot;?
-        </h1>
-        <form
-          className="flex ring-4 rounded-md ring-slate-200 dark:ring-slate-800 focus-within:ring-teal-600 focus-within:ring-offset-4 bg-slate-200 ring-offset-slate-200 dark:ring-offset-slate-800"
-          onSubmit={handleSubmit}
-        >
-          <input
-            autoFocus
-            className="bg-inherit rounded-md font-sans text-slate-800 py-2 px-6 focus:outline-none text-xl sm:text-2xl placeholder:text-slate-400 caret-teal-600 appearance-none w-full"
-            maxLength="64"
-            placeholder="Enter one thing"
-            type="text"
-            value={thing}
-            onChange={handleChange}
+        {isCompleted && (
+          <CustomForm
+            handleChange={handleChange}
+            handleSubmit={handleSubmit}
+            thing={thing}
           />
-          <button className="bg-inherit rounded-md font-sans text-slate-800 py-2 pr-6 focus:outline-none focus:text-teal-600 hover:text-teal-600">
-            <ArrowCircleRightIcon className="h-12 w-12" />
-          </button>
-        </form>
+        )}
+        {!isCompleted && (
+          <OneThing handleCompletedThing={handleCompletedThing} thing={thing} />
+        )}
       </div>
     </main>
   )
